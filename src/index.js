@@ -1,23 +1,59 @@
-function createElement(tagName, ...children) {
+/* @jsx createElement */
+
+
+function createElement(tagName, props, ...children) {
+    console.log(tagName, props, ...children)
   const element = document.createElement(tagName);
 
-  children.forEach((child) => element.appendChild(child));
+  Object.entries(props || {}).forEach(([key, value]) => {
+    element[key.toLowerCase()] = value
+  })
+
+  children.flat().forEach((child) => {
+    if (child instanceof Node) {
+        element.appendChild(child)
+        return;
+    }
+    element.appendChild(document.createTextNode(child))
+  });
 
   return element;
 }
-document.getElementById('app').appendChild(
-  createElement(
-    'div',
-    createElement(
-      'p',
-      document.createTextNode('Hello, world'),
-      ...[1, 2, 3].map((i) => (
-        document.createTextNode(`Hello, world! ${i} |`)
-      )),
-    ),
-    createElement(
-      'p',
-      document.createTextNode('Hi'),
-    ),
-  ),
-);
+
+let count = 0
+
+function handleClick() {
+    count += 1
+    render()
+}
+
+function handleClickNumber(value) {
+    count = value
+    render()
+}
+
+function render() {
+    const element = (
+        <div id="Hello" className="greeting">
+            <p>Hello, world!</p>
+            <p>
+                <button type="button" onclick={handleClick}>
+                    click me (
+                        {count}
+                    )
+                </button>
+            </p>
+            <p>
+                {[1,2,3].map((i) => (
+                    <button type="button" onClick={() => handleClickNumber(i)}>
+                        {i}
+                    </button>
+                ))}
+            </p>
+        </div>
+    )
+    document.getElementById('app').textContent = ''
+    document.getElementById('app').appendChild(element);
+}
+
+render()
